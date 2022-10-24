@@ -6,6 +6,7 @@ require('./db/conn')
 const port = process.env.PORT || 5000
 const bodyParser = require('body-parser')
 const routes = require('./routes')
+const path = require('path')
 const http = require('http')
 const axios = require('axios')
 const server = http.createServer(app)
@@ -22,6 +23,13 @@ app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use("/uploads", express.static(__dirname + '/uploads'));
+
+app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+app.get('/', function (req, res) {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
+
 app.use('/api', routes)
 
 app.use(function (req, res) {
@@ -76,12 +84,14 @@ io.on('connection', (socket) => {
         base64 = base64.replace(/ /g, '+')
         const curTime = (new Date()).getTime()
         const fileName = './uploads/' + curTime + '.mp4'
-        const thumbnailData = res.data.thumbnail
+        let thumbnailData = res.data.thumbnail
+        thumbnailData = thumbnailData.replace(/^data:(.*?)base64,/, "")
+        thumbnailData = thumbnailData.replace(/ /g, '+')
         fs.writeFile(fileName, base64, 'base64', async function (err) {
           if (err) socket.emit('error', err)
           console.log('done')
           const thumbnailUrl = './uploads/thumbnails/' + curTime + '.png'
-
+          console.log(res.data.thumbnail)
           fs.writeFile(thumbnailUrl, thumbnailData, 'base64', async function (err) {
             if (err) socket.emit('error', err)
             console.log('thumbnailData done', userInfo)
