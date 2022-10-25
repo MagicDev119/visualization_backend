@@ -89,32 +89,39 @@ io.on('connection', (socket) => {
 
         let res = await axios.post('https://sdv.alternatefutures.com/api/txt2video_concurrent', payload)
         let base64 = res.data.base64
-        base64 = base64.replace(/^data:(.*?)base64,/, "")
-        base64 = base64.replace(/ /g, '+')
-        const curTime = (new Date()).getTime()
-        const fileName = './uploads/' + curTime + '.mp4'
-        let thumbnailData = res.data.thumbnail
-        thumbnailData = thumbnailData.replace(/^data:(.*?)base64,/, "")
-        thumbnailData = thumbnailData.replace(/ /g, '+')
-        fs.writeFile(fileName, base64, 'base64', async function (err) {
-          if (err) socket.emit('error', err)
-          console.log('done')
-          const thumbnailUrl = './uploads/thumbnails/' + curTime + '.png'
-          fs.writeFile(thumbnailUrl, thumbnailData, 'base64', async function (err) {
+        if (base64) {
+          base64 = base64.replace(/^data:(.*?)base64,/, "")
+          base64 = base64.replace(/ /g, '+')
+          const curTime = (new Date()).getTime()
+          const fileName = './uploads/' + curTime + '.mp4'
+          let thumbnailData = res.data.thumbnail
+          thumbnailData = thumbnailData ? thumbnailData.replace(/^data:(.*?)base64,/, "") : ''
+          thumbnailData = thumbnailData ? thumbnailData.replace(/ /g, '+') : ''
+          fs.writeFile(fileName, base64, 'base64', async function (err) {
             if (err) socket.emit('error', err)
-            console.log('thumbnailData done', userInfo)
-            const newVision = await ADD_VISION({
-              ...data,
-              userInfo,
-              description: data.description,
-              fileName,
-              type: data.type,
-              thumbnail_url: thumbnailUrl
+            console.log('done')
+            const thumbnailUrl = './uploads/thumbnails/' + curTime + '.png'
+            fs.writeFile(thumbnailUrl, thumbnailData, 'base64', async function (err) {
+              if (err) socket.emit('error', err)
+              console.log('thumbnailData done', userInfo)
+              const newVision = await ADD_VISION({
+                ...data,
+                userInfo,
+                description: data.description,
+                fileName,
+                type: data.type,
+                thumbnail_url: thumbnailUrl
+              })
+              socket.emit('generated', newVision)
+              socket.isProcessing = false;
             })
-            socket.emit('generated', newVision)
-            socket.isProcessing = false;
           })
-        })
+        } else {
+          socket.emit('error', {
+            code: 401,
+            msg: 'Unauthorized'
+          })
+        }
       })
     } else {
       socket.emit('error', {
