@@ -11,7 +11,7 @@ const index = async function (req, res, next) {
     const defaultQuery = {
       category: "default"
     }
-    let visualizationList = !req.query.filterType ? [] : await visualizationModel.find(findQuery).populate('userId')
+    let visualizationList = !req.query.filterType ? [] : ((req.query.filterType === 'like') ? await visualizationModel.find({}).populate('userId') : await visualizationModel.find(findQuery).populate('userId'))
     let sharedVisualizationList = req.query.filterType ? [] : await visualizationModel.find(sharedQuery).populate('userId')
     visualizationList = [...visualizationList, ...sharedVisualizationList]
     visualizationList = visualizationList.filter(each => {

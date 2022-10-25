@@ -24,11 +24,13 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use("/uploads", express.static(__dirname + '/uploads'));
 
+// app.use(express.static(path.join(__dirname, '../frontend/build')));
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/api', routes)
 
 app.get('/**', function (req, res) {
+  // res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
@@ -53,6 +55,8 @@ io.on('connection', (socket) => {
       socket.progressTimer = 1
     }
 
+    console.log(socket.isProcessing)
+    console.log('-' + socket.progressTimer)
     socket.emit('changeTimer', socket.progressTimer)
   }, 1000)
   socket.on('message', async (data) => {
@@ -89,6 +93,7 @@ io.on('connection', (socket) => {
 
         let res = await axios.post('https://sdv.alternatefutures.com/api/txt2video_concurrent', payload)
         let base64 = res.data.base64
+        console.log('generate finished')
         if (base64) {
           base64 = base64.replace(/^data:(.*?)base64,/, "")
           base64 = base64.replace(/ /g, '+')
@@ -132,7 +137,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('disconnect', function () {
-    clearInterval(socket.socketTimer)
+    // clearInterval(socket.socketTimer)
   });
 })
 

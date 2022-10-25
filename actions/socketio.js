@@ -10,6 +10,14 @@ module.exports = {
       thumbnail_url: data.thumbnail_url
     }).save();
 
-    return newVision;
+    const findQuery = {
+      userId: data.userInfo.id
+    }
+    let visualizationList = await VisualizationModel.find(findQuery)
+
+    return {
+      ...newVision,
+      cnt: visualizationList.length
+    };
   },
 };
