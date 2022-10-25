@@ -16,11 +16,11 @@ const UserSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        enum: ["Male", "Female"]
+        enum: ["Male", "Female", "Nonbinary", "Decline to answer"]
     },
     race: {
         type: String,
-        enum: ['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Hispanic or Latino', 'Native Hawaiian or Other Pacific Islander', 'White']
+        enum: ['Black or African', 'American', 'Asian', 'Hispanic or Latino', 'White', 'Other', 'Multiracial']
     }
 }, {
     timestamps: true

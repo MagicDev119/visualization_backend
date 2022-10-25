@@ -26,11 +26,11 @@ app.use("/uploads", express.static(__dirname + '/uploads'));
 
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 
-app.get('/', function (req, res) {
+app.use('/api', routes)
+
+app.get('/**', function (req, res) {
   res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
 });
-
-app.use('/api', routes)
 
 app.use(function (req, res) {
   res.status(404).send({ url: req.originalUrl + ' not found' })
@@ -46,6 +46,15 @@ const io = require('socket.io')(server, {
   }
 })
 io.on('connection', (socket) => {
+  socket.socketTimer = setInterval(() => {
+    if (socket.isProcessing) {
+      socket.progressTimer = (socket.progressTimer || 1) + 1
+    } else {
+      socket.progressTimer = 1
+    }
+
+    socket.emit('changeTimer', socket.progressTimer)
+  }, 1000)
   socket.on('message', async (data) => {
     if (data.token) {
 
@@ -91,7 +100,6 @@ io.on('connection', (socket) => {
           if (err) socket.emit('error', err)
           console.log('done')
           const thumbnailUrl = './uploads/thumbnails/' + curTime + '.png'
-          console.log(res.data.thumbnail)
           fs.writeFile(thumbnailUrl, thumbnailData, 'base64', async function (err) {
             if (err) socket.emit('error', err)
             console.log('thumbnailData done', userInfo)
@@ -115,6 +123,10 @@ io.on('connection', (socket) => {
       })
     }
   })
+
+  socket.on('disconnect', function () {
+    clearInterval(socket.socketTimer)
+  });
 })
 
 server.listen(port, () => {

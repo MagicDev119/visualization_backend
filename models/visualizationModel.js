@@ -20,7 +20,7 @@ const VisualizationSchema = new mongoose.Schema({
     },
     shared: {
         type: Boolean,
-        default: false
+        default: true
     },
     thumbnail_url: {
         type: String

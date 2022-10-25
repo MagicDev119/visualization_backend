@@ -7,12 +7,11 @@ const index = async function (req, res, next) {
       userId: req.user._id
     }
     const sharedQuery = {
-      shared: true
     }
     const defaultQuery = {
       category: "default"
     }
-    let visualizationList = await visualizationModel.find(findQuery).populate('userId')
+    let visualizationList = !req.query.filterType ? [] : await visualizationModel.find(findQuery).populate('userId')
     let sharedVisualizationList = req.query.filterType ? [] : await visualizationModel.find(sharedQuery).populate('userId')
     visualizationList = [...visualizationList, ...sharedVisualizationList]
     visualizationList = visualizationList.filter(each => {
@@ -24,7 +23,7 @@ const index = async function (req, res, next) {
       const filterType = req.query.filterType ? ((req.query.filterType === 'like') ? (each.like.includes(req.user.email)) : (each.type === req.query.filterType)) : true
       return gender && race && age && search && filterType
     })
-    let defaultList = (req.query.q || (req.query.filterType && req.query.filterType !== 'like')) ? [] : await visualizationModel.find(defaultQuery)
+    let defaultList = [] //(req.query.q || (req.query.filterType && req.query.filterType !== 'like')) ? [] : await visualizationModel.find(defaultQuery)
     defaultList = defaultList.filter(each => {
       const filterType = req.query.filterType ? ((req.query.filterType === 'like') ? (each.like.includes(req.user.email)) : (each.type === req.query.filterType)) : true
       return filterType
