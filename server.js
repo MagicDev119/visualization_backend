@@ -24,12 +24,12 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 app.use("/uploads", express.static(__dirname + '/uploads'));
 
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 app.use('/api', routes)
 
 app.get('/**', function (req, res) {
-  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
 app.use(function (req, res) {
