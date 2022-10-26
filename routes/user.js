@@ -7,5 +7,6 @@ router.post('/login', userController.login)
 router.get('/', verifyAuthenticateToken, userController.getUser)
 router.put('/', verifyAuthenticateToken, userController.update)
 router.get('/logout', verifyAuthenticateToken, userController.logout)
+router.get('/resetVisionData', verifyAuthenticateToken, userController.resetVisionData)
 
 module.exports = router

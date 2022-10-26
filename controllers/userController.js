@@ -1,6 +1,8 @@
 const JwtUtils = require('../utils/jwt.utils')
 const userModel = require('../models/userModel')
 const visualizationModel = require('../models/visualizationModel')
+const { response } = require('express')
+const { json } = require('body-parser')
 
 const store = async function (req, res, next) {
   try {
@@ -146,10 +148,28 @@ const logout = async function (req, res, next) {
   }
 }
 
+const resetVisionData = async function (req, res, next) {
+  await userModel.find({}).update({
+    $set: {
+      visionStatus: {
+        isProcessing: false,
+        progressTimer: 1,
+        visionData: {}
+      }
+    }
+  });
+
+  return res.status(200).send({
+    code: 200,
+    msg: "success"
+  })
+}
+
 module.exports = {
-  store: store,
-  login: login,
-  getUser: getUser,
-  update: update,
-  logout: logout
+  store,
+  login,
+  getUser,
+  update,
+  logout,
+  resetVisionData
 }
