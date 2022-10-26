@@ -11,15 +11,15 @@ const index = async function (req, res, next) {
     const defaultQuery = {
       category: "default"
     }
-    let visualizationList = !req.query.filterType ? [] : ((req.query.filterType === 'like') ? await visualizationModel.find({}).populate('userId') : await visualizationModel.find(findQuery).populate('userId'))
-    let sharedVisualizationList = req.query.filterType ? [] : await visualizationModel.find(sharedQuery).populate('userId')
+    let visualizationList = !req.query.filterType ? [] : ((req.query.filterType === 'like') ? await visualizationModel.find({}).sort({ createdAt: 'desc' }).populate('userId') : await visualizationModel.find(findQuery).sort({ createdAt: 'desc' }).populate('userId'))
+    let sharedVisualizationList = req.query.filterType ? [] : await visualizationModel.find(sharedQuery).sort({ createdAt: 'desc' }).populate('userId')
     visualizationList = [...visualizationList, ...sharedVisualizationList]
     visualizationList = visualizationList.filter(each => {
       if (!each.userId) return false
       const gender = req.query.gender ? (each.userId.gender === req.query.gender) : true
       const race = req.query.race ? (each.userId.race === req.query.race) : true
       const age = req.query.age ? (utils._calculateAge(each.userId.birthday) == req.query.age) : true
-      const search = req.query.q ? (each.userId.email && each.userId.email.toLowerCase().includes(req.query.q.toLowerCase())) : true
+      const search = req.query.q ? (each.description && each.description.join(',').toLowerCase().includes(req.query.q.toLowerCase())) : true
       const filterType = req.query.filterType ? ((req.query.filterType === 'like') ? (each.like.includes(req.user.email)) : (each.type === req.query.filterType)) : true
       return gender && race && age && search && filterType
     })

@@ -1,3 +1,4 @@
+const UserModel = require("../models/userModel");
 const VisualizationModel = require("../models/visualizationModel");
 
 module.exports = {
@@ -18,6 +19,27 @@ module.exports = {
     return {
       ...newVision,
       cnt: visualizationList.length
+    };
+  },
+  SAVE_VISOINDATA: async data => {
+    await UserModel.findById(data.userId).update({
+      $set: {
+        visionStatus: {
+          isProcessing: data.isProcessing,
+          progressTimer: data.progressTimer,
+          visionData: data.visionData,
+          curTime: data.curTime
+        }
+      }
+    })
+
+    return
+  },
+  GET_VISION_STATUS: async data => {
+    const user = await UserModel.findById(data.userId)
+
+    return {
+      visionStatus: user.visionStatus
     };
   },
 };

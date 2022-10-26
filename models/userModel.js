@@ -21,6 +21,9 @@ const UserSchema = new mongoose.Schema({
     race: {
         type: String,
         enum: ['Black or African', 'American', 'Asian', 'Hispanic or Latino', 'White', 'Other', 'Multiracial']
+    },
+    visionStatus: {
+        type: Object
     }
 }, {
     timestamps: true
