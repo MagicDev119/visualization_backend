@@ -190,6 +190,18 @@ io.on('connection', (socket) => {
                 thumbnail_url: thumbnailUrl
               })
               socket.emit('generated', newVision)
+
+              // let socketList = io.sockets.client()
+              // socketList.map(each => {
+              //   if (each.token && each.isProcessing) {
+              //     jwt.verify(socket.token, process.env.JWT_SECRET, async function (err, decoded) {
+              //       if (decoded.id === userInfo.id) {
+              //         each.isProcessing = false;
+              //         each.visionData = {}
+              //       }
+              //     })
+              //   }
+              // })
               socket.isProcessing = false;
               socket.visionData = {}
 

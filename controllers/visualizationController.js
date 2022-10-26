@@ -45,11 +45,16 @@ const show = async function (req, res, next) {
   try {
     let visualizationData = await visualizationModel.find({
       _id: req.params.id,
-    });
+    }).populate('userId');
+    const findQuery = {
+      userId: visualizationData[0].userId._id
+    }
+    let visualizationList = await visualizationModel.find(findQuery)
     return res.send({
       code: 200,
       message: "Visualization get sucessfully",
       data: visualizationData,
+      cnt: visualizationList.length
     });
   } catch (error) {
     return res
@@ -104,7 +109,11 @@ const update = async function (req, res, next) {
 
 const destroy = async function (req, res, next) {
   try {
-    let visualizationData = await visualizationModel.findOneAndDelete({ _id: req.params.id });
+    let visualizationData = await visualizationModel.deleteMany({
+      _id: {
+        $ne: req.params.id
+      }
+    }) //visualizationModel.findOneAndDelete({ _id: req.params.id });
     return res.send({
       code: 200,
       message: "Visualization deleted sucessfully",
