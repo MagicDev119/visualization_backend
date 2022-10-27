@@ -191,17 +191,18 @@ io.on('connection', (socket) => {
               })
               socket.emit('generated', newVision)
 
-              // let socketList = io.sockets.client()
-              // socketList.map(each => {
-              //   if (each.token && each.isProcessing) {
-              //     jwt.verify(socket.token, process.env.JWT_SECRET, async function (err, decoded) {
-              //       if (decoded.id === userInfo.id) {
-              //         each.isProcessing = false;
-              //         each.visionData = {}
-              //       }
-              //     })
-              //   }
-              // })
+              const sockets = await io.fetchSockets();
+              sockets.map(eachSocket => {
+                if (eachSocket.token && eachSocket.isProcessing) {
+                  jwt.verify(socket.token, process.env.JWT_SECRET, async function (err, decoded) {
+                    if (decoded.id === userInfo.id) {
+                      eachSocket.emit('generated', newVision)
+                      eachSocket.isProcessing = false;
+                      eachSocket.visionData = {}
+                    }
+                  })
+                }
+              })
               socket.isProcessing = false;
               socket.visionData = {}
 
