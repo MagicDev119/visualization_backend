@@ -54,7 +54,7 @@ const show = async function (req, res, next) {
       code: 200,
       message: "Visualization get sucessfully",
       data: visualizationData,
-      cnt: visualizationList.length
+      cnt: utils._calculateAge(visualizationData[0].userId.birthday)
     });
   } catch (error) {
     return res
