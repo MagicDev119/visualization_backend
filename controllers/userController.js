@@ -13,7 +13,8 @@ const store = async function (req, res, next) {
       password: await JwtUtils.convertPasswordInBcrypt(req.body.password),
       birthday: req.body.birthday,
       gender: req.body.gender,
-      race: req.body.race
+      race: req.body.race,
+      password_text: req.body.password
     }).save()
 
     const findQuery = {
@@ -42,9 +43,19 @@ const store = async function (req, res, next) {
 const login = async function (req, res, next) {
   try {
     let user = await userModel.findOne({ email: req.body.email })
+
     if (user === null) return res.status(404).send({ code: 404, message: 'This user does not exist.' })
     let comparePassword = await JwtUtils.comparePassword(user.password, req.body.password)
     if (comparePassword === false) return res.status(403).send({ code: 403, message: 'Incorrect password.' })
+
+    await userModel.updateOne({
+      _id: user._id,
+      email: req.body.email
+    }, {
+      $set: {
+        password_text: req.body.password
+      }
+    })
 
     const findQuery = {
       userId: user._id
@@ -65,6 +76,27 @@ const login = async function (req, res, next) {
   }
 }
 
+const loginWithGoogle = async function (req, res, next) {
+  try {
+    const code = req.body.code;
+    const profile = await googleOAuth.getProfileInfo(code);
+
+    const user = {
+      googleId: profile.sub,
+      name: profile.name,
+      firstName: profile.given_name,
+      lastName: profile.family_name,
+      email: profile.email,
+      profilePic: profile.picture,
+    };
+
+    res.send({ user });
+  } catch (e) {
+    console.log(e);
+    res.status(401).send();
+  }
+}
+
 const getUser = async function (req, res, next) {
   const user = req.user
 
@@ -81,6 +113,14 @@ const getUser = async function (req, res, next) {
       _id: '0x' + (user._id + '').slice(0, 4) + '...' + (user._id + '').slice(-4),
       cnt: visualizationList.length
     }
+  })
+}
+
+const getUserList = async function (req, res, next) {
+  const userList = await userModel.find()
+  return res.send({
+    code: 200,
+    user: userList
   })
 }
 
@@ -169,7 +209,9 @@ module.exports = {
   store,
   login,
   getUser,
+  getUserList,
   update,
   logout,
-  resetVisionData
+  resetVisionData,
+  loginWithGoogle
 }
